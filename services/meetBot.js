@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 import { io } from "socket.io-client"; // Import socket.io-client
 import { promisify } from "util";
 import { exec } from "child_process";
-
+import addCaptions from "./db/queries.js";
 const execAsync = promisify(exec);
 
 const AUTH_PATH = path.resolve("auth.json");
@@ -220,23 +220,43 @@ async function stopCaptions() {
 }
 
 async function scrapeCaptions(page) {
-  const captionSelector =
-    '[data-testid="caption-text"], .captions-text, .closed-captions-text';
+  const captionSelector = '.iOzk7 .ygicle.VbkSUe'; // Target caption text
+  const speakerSelector = '.iOzk7 .NWpY1d'; // Target speaker name
+  console.log("Scraping captions with selector:", captionSelector);
 
   while (scrapingActive) {
     try {
       const captionElements = await page.locator(captionSelector).all();
+      console.log(`Found ${captionElements.length} caption elements`);
 
       for (const element of captionElements) {
-        const text = await element.textContent();
-        if (text && text.trim()) {
-          captionsSegments.push({
-            text: text.trim(),
+        const captionText = await element.textContent();
+        console.log('Raw caption text:', captionText);
+
+        if (captionText && captionText.trim()) {
+          // Get the parent caption segment to find the speaker
+          const parentSegment = await element.locator('xpath=ancestor::div[contains(@class, "nMcdL")]').first();
+          const speakerElement = await parentSegment.locator(speakerSelector).first();
+          const speaker = (await speakerElement.count() > 0)
+            ? await speakerElement.textContent()
+            : 'Unknown';
+
+          const caption = {
+            text: captionText.trim(),
+            speaker: speaker.trim(),
             timestamp: new Date().toISOString(),
-          });
+          };
+          captionsSegments.push(caption);
+        } else {
+          console.log('Empty or invalid caption text, skipping.');
         }
       }
-
+      console.log('Current captionsSegments:', captionsSegments);
+      if (captionsSegments.length > 0) {
+        await addCaptions(captionsSegments[captionsSegments.length - 1]);
+      } else {
+        console.log('No captions to add to database.');
+      }
       await page.waitForTimeout(1000); // Check every second
     } catch (error) {
       console.error("❌ Error scraping captions:", error);

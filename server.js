@@ -6,7 +6,6 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 
 dotenv.config();
-
 const app = express();
 
 // Middleware setup
