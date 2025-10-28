@@ -574,8 +574,8 @@ async function startChatScraping() {
             
               console.log('LLM query started')
               try{
-                const result=await queryLLM();
-                console.log("result",result);
+                const result="The capital of India is New Delhi.";
+                await sendChatMessage(result);
               }
               catch(err){
                 console.error("❌ Error answer question :", err);
@@ -805,10 +805,53 @@ function stopParticipantMonitoring() {
     console.log("🔴 Participant monitoring stopped.");
   }
 }
-async function getCaptions(){
-  return captionsSegments;
-}
+async function sendChatMessage(message) {
+  if (!page) {
+    console.error("❌ No meeting page available. Cannot send chat message.");
+    return;
+  }
 
+  if (!message || typeof message !== 'string' || message.trim() === '') {
+    console.error("❌ Invalid message provided. Must be a non-empty string.");
+    return;
+  }
+
+  try {
+    // Ensure chat window is open
+    const chatPanel = page.locator('div.Ge9Kpc').first();
+    if (!(await chatPanel.isVisible())) {
+      const chatButton = page.locator('[aria-label="Show chat"], button:has-text("Chat")');
+      if (await chatButton.count() > 0) {
+        await chatButton.click();
+        console.log("💬 Opened chat window to send message.");
+        await chatPanel.waitFor({ state: 'visible', timeout: 10000 });
+      } else {
+        throw new Error("❌ Chat button not found.");
+      }
+    }
+
+    // Locate the message input textarea
+    const messageInput = page.locator('textarea[aria-label*="Chat with everyone"], textarea[aria-label*="Send a message"]');
+    if (await messageInput.count() === 0) {
+      throw new Error("❌ Chat message input not found.");
+    }
+
+    // Fill the message
+    await messageInput.fill(message.trim());
+
+    // Locate and click the send button, or use Enter as fallback
+    const sendButton = page.locator('button[aria-label="Send message"]');
+    if (await sendButton.count() > 0) {
+      await sendButton.click();
+      console.log(`📤 Sent chat message: "${message}"`);
+    } else {
+      await messageInput.press('Enter');
+      console.log(`📤 Sent chat message using Enter key: "${message}"`);
+    }
+  } catch (error) {
+    console.error("❌ Error sending chat message:", error);
+  }
+}
 export {
   startCaptions,
   stopCaptions,
