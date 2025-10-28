@@ -1,11 +1,13 @@
 import { Mistral } from "@mistralai/mistralai";
 import prompts from "../LLM/prompt.js"
+import { getCaptions } from "../db/queries.js";
 const mistral = new Mistral({
   apiKey: process.env.MISTRAL_API_KEY,
 });
 
 const queryLLM=async()=> {
-  const captions="What is the capital of India?"
+  const captions=await getCaptions();
+  console.log('captions fetched for LLM query',captions);
   if(!captions)return ;
   const result = await mistral.chat.complete({
     model: "mistral-small-latest",
@@ -18,6 +20,7 @@ const queryLLM=async()=> {
   });
 
   console.log(result.choices[0].message);
+  return result.choices[0].message.content;
 }
 
 export default queryLLM;

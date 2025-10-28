@@ -70,5 +70,4 @@ httpServer.listen(PORT, () => {
   console.log(
     `📋 API endpoints available at http://localhost:${PORT}/api/meet`
   );
-  queryLLM();
 });

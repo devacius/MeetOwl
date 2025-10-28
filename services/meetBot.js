@@ -4,7 +4,8 @@ import { chromium } from "playwright";
 import { io } from "socket.io-client"; // Import socket.io-client
 import { promisify } from "util";
 import { exec } from "child_process";
-import addCaptions from "./db/queries.js";
+import {addCaptions} from "./db/queries.js";
+import queryLLM from "./LLM/queryLLM.js";
 const execAsync = promisify(exec);
 
 const AUTH_PATH = path.resolve("auth.json");
@@ -543,6 +544,18 @@ async function startChatScraping() {
               }
             }
           }
+          else if (messageText.includes("stormee stop caption recording")) {
+            if (!scrapingActive) {
+              console.log("ℹ️ Caption recording not in progress.");
+            } else {
+              console.log("🚀 Triggering caption stop.");
+              try {
+                await stopCaptions();
+              } catch (error) {
+                console.error("❌ Error starting caption recording from chat command:", error);
+              }
+            }
+          }
           else if (messageText.includes("stormee stop recording")){
             if (!currentMeetingId || !audioChunks[currentMeetingId]) {
               console.log("ℹ️ Audio recording not in progress for meeting:", currentMeetingId);
@@ -556,6 +569,20 @@ async function startChatScraping() {
               }
             }
           }
+          
+        else if(messageText.includes("stormee answer my last question")){
+            
+              console.log('LLM query started')
+              try{
+                const result=await queryLLM();
+                console.log("result",result);
+              }
+              catch(err){
+                console.error("❌ Error answer question :", err);
+              }
+            
+          }
+        
         });
         console.log("✅ Exposed sendChatMessageToNode function.");
       } else {
@@ -777,6 +804,9 @@ function stopParticipantMonitoring() {
     participantMonitorInterval = null;
     console.log("🔴 Participant monitoring stopped.");
   }
+}
+async function getCaptions(){
+  return captionsSegments;
 }
 
 export {
