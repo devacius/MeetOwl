@@ -25,6 +25,7 @@
     "wave-resampler": "^1.0.0"
   },
   "dependencies": {
+    "@mistralai/mistralai": "^1.10.0",
     "pg": "^8.16.3",
     "socket.io-client": "^4.8.1",
     "wavefile": "^11.0.0"

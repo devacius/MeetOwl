@@ -4,6 +4,7 @@ import meetRoutes from "./routes/meetRoutes.js";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import queryLLM from "./services/LLM/queryLLM.js";
 
 dotenv.config();
 const app = express();
@@ -69,4 +70,5 @@ httpServer.listen(PORT, () => {
   console.log(
     `📋 API endpoints available at http://localhost:${PORT}/api/meet`
   );
+  queryLLM();
 });
