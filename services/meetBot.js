@@ -574,7 +574,7 @@ async function startChatScraping() {
             
               console.log('LLM query started')
               try{
-                const result="The capital of India is New Delhi.";
+                const result=await queryLLM();
                 await sendChatMessage(result);
               }
               catch(err){
