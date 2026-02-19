@@ -1,7 +1,8 @@
-# gmeet-bot
+```markdown
+# MeetOwl
 ## Overview
 
-`gmeet-bot` is a tool designed to interact with Google Meet sessions programmatically. It provides APIs for managing meetings, recording sessions, and converting audio files to `.wav` format. The bot ensures that each meeting ID is unique to avoid conflicts.
+`MeetOwl` is a tool designed to interact with Google Meet sessions programmatically. It provides APIs for managing meetings, recording sessions, and converting audio files to `.wav` format. The bot ensures that each meeting ID is unique to avoid conflicts.
 
 ## Prerequisites
 
@@ -38,8 +39,8 @@
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/gmeet-bot.git
-    cd gmeet-bot
+    git clone https://github.com/your-username/MeetOwl.git
+    cd MeetOwl
     ```
 
 2. Install dependencies:
@@ -95,3 +96,4 @@ curl --location 'http://localhost:3000/api/meet/record/start' \
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+```
