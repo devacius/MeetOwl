@@ -1,5 +1,5 @@
 import {
-    joinMeeting,
+   
     pauseAudio,
     playAudio,
     startCaptions,
@@ -9,6 +9,7 @@ import {
     stopChatScraping,
     startChatScraping,
   } from "../services/meetBot.js";
+import { joinMeeting } from "../services/parent.js";
   
   let currentMeetingUrl = null;
   
@@ -36,17 +37,18 @@ import {
   
   const loginController = async (req, res) => {
     try {
-      const { meetingUrl } = req.body;
+      const { meetingUrl,meetingId } = req.body;
       if (!meetingUrl)
         return res.status(400).json({ error: "meetingUrl is required" });
   
-      currentMeetingUrl = meetingUrl;
-      joinMeeting(meetingUrl)
+      console.log("Meeting URL:", meetingUrl);
+      console.log("Meeting ID:", meetingId);
+      joinMeeting(meetingUrl,meetingId)
         .then(() => console.log("Joined meeting"))
         .catch((err) => console.error(err));
       res.json({ message: "Meeting joined" });
     } catch (err) {
-      res.status(500).json({ error: "Failed to join meeting" });
+      res.status(500).json({ error: "Failed to join meeting"+err});
     }
   };
   

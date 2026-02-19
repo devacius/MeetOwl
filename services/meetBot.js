@@ -23,7 +23,7 @@ let chatScrapingActive = true;
 let participantCount=0;
 let participantMonitorInterval = null; // To store the interval for participant 
 
-async function ensureAuthSession(meetingUrl, asGuest = true) {
+async function ensureAuthSession(meetingUrl, asGuest = false) {
   console.log("🔐 Ensuring authentication session...");
 
   browser = await chromium.launch({
@@ -140,7 +140,7 @@ async function pauseAudio() {
   }
 }
 
-async function joinMeeting(meetingUrl, asGuest = true) {
+async function joinMeeting(meetingUrl, asGuest = false) {
   console.log("🚀 Joining meeting:", meetingUrl);
 
   await ensureAuthSession(meetingUrl, asGuest);
@@ -156,7 +156,7 @@ async function joinMeeting(meetingUrl, asGuest = true) {
     try {
       await pauseAudio();
       // Similarly for camera if needed
-      const camButton = await page.locator('[aria-label*="camera"]').first();
+      const camButton = await page.locator('[aria-label*="Turn off camera"]').first();
       if (await camButton.count() > 0) {
         await camButton.click();
         console.log("📹 Camera paused.");
@@ -180,7 +180,9 @@ async function joinMeeting(meetingUrl, asGuest = true) {
     console.log("🚀 Clicked 'Ask to join'");
   } else {
     // For logged in, click Join now
-    const joinNowButton = page.locator('button:has-text("Join now")');
+
+    const joinNowButton = page.locator('button:has-text("Join now"), button:has-text("Ask to join")');
+
     await joinNowButton.waitFor({ timeout: 10000 });
     await joinNowButton.click();
     console.log("🚀 Clicked 'Join now'");
@@ -621,6 +623,7 @@ async function startChatScraping() {
                   };
 
                   if (chatMessage.text) {
+                    console.log("checking the mssage here:",chatMessage)
                     window.sendChatMessageToNode(chatMessage);
                   }
                 }
@@ -788,10 +791,10 @@ function startParticipantMonitoring() {
     
       lastCount = newCount;
       // Check if only the bot remains (count === 1)
-      if (newCount === 1) {
-        console.log("⚠️ Only one participant remains (bot). Exiting meeting...");
-        await leaveMeeting();
-      }
+      // if (newCount === 1) {
+      //   console.log("⚠️ Only one participant remains (bot). Exiting meeting...");
+      //   await leaveMeeting();
+      // }
     } catch (error) {
       console.error("❌ Error during participant monitoring:", error);
     }
